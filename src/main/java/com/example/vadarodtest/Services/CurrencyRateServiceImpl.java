@@ -11,13 +11,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CurrencyRateServiceImpl implements CurrencyRateService{
+public class CurrencyRateServiceImpl implements CurrencyRateService {
     private final CurrencyRateRepository currencyRateRepository;
 
     @Override
     public CurrencyRate findCurrencyRateById(Long id) {
         return currencyRateRepository.findById(id)
-                .orElseThrow(()->new CurrencyRateNotFoundException("CurrencyRate not found"));
+                .orElseThrow(() -> new CurrencyRateNotFoundException("CurrencyRate not found"));
     }
 
     @Override
@@ -33,19 +33,19 @@ public class CurrencyRateServiceImpl implements CurrencyRateService{
 
     @Override
     public void deleteCurrencyRateById(Long id) {
-       currencyRateRepository.deleteById(id);
+        currencyRateRepository.deleteById(id);
     }
 
     @Override
     public CurrencyRate findCurrencyRateByCurrencyCodeAndDate(String code, LocalDate date) {
-        return currencyRateRepository.findCurrencyRateByCurrencyCodeAndDate(code,date)
-                .orElseThrow(()->new CurrencyRateNotFoundException("CurrencyRate not found"));
+        return currencyRateRepository.findCurrencyRateByCurrencyCodeAndDate(code, date)
+                .orElseThrow(() -> new CurrencyRateNotFoundException("CurrencyRate not found"));
     }
 
     @Override
     public List<CurrencyRate> findCurrencyRatesByDate(LocalDate date) {
         return currencyRateRepository.findCurrencyRatesByDate(date)
-                .orElseThrow(()->new CurrencyRateNotFoundException("CurrencyRates not founds for this data"));
+                .orElseThrow(() -> new CurrencyRateNotFoundException("CurrencyRates not founds for this data"));
     }
 
     @Override
