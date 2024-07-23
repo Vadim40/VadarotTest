@@ -29,11 +29,25 @@ public class CurrencyRateRepositoryTest {
         currencyRateRepository.saveAll(currencyRates);
 
         List<CurrencyRate> foundCurrencyRates = currencyRateRepository
-                .findCurrencyRatesByDate(LocalDate.of(2024, 7, 23));
+                .findCurrencyRatesByDate(LocalDate.of(2024, 7, 23))
+                .orElseThrow(()->new RuntimeException());
 
         Assertions.assertThat(foundCurrencyRates.size()).isEqualTo(2);
     }
 
+    @Test
+    public void testExistsByDate() {
+        List<CurrencyRate> currencyRates = Arrays.asList(
+                CurrencyRate.builder().date(LocalDate.of(2024, 7, 23)).build(),
+                CurrencyRate.builder().date(LocalDate.of(2024, 7, 23)).build(),
+                CurrencyRate.builder().date(LocalDate.of(2024, 7, 22)).build());
+        currencyRateRepository.saveAll(currencyRates);
+
+       boolean dataLoadedForDate= currencyRateRepository.existsByDate(LocalDate.of(2024, 7, 23));
+
+
+        Assertions.assertThat(dataLoadedForDate).isTrue();
+    }
     @Test
     public void testFindCurrencyRateByCurrencyCodeAndDate() {
         BigDecimal rate1 = new BigDecimal("2.6");
@@ -52,7 +66,8 @@ public class CurrencyRateRepositoryTest {
         currencyRateRepository.saveAll(currencyRates);
 
         CurrencyRate foundCurrencyRate = currencyRateRepository
-                .findCurrencyRateByCurrencyCodeAndDate("Usd", LocalDate.of(2024, 7, 23));
+                .findCurrencyRateByCurrencyCodeAndDate("Usd", LocalDate.of(2024, 7, 23))
+                .orElseThrow(()-> new RuntimeException());
 
         Assertions.assertThat(foundCurrencyRate.getRate()).isEqualTo(rate1);
     }

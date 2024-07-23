@@ -6,9 +6,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CurrencyRateRepository extends JpaRepository<CurrencyRate, Long> {
-    List<CurrencyRate> findCurrencyRatesByDate(LocalDate date);
-    CurrencyRate findCurrencyRateByCurrencyCodeAndDate(String code, LocalDate date);
+    Optional<List<CurrencyRate>> findCurrencyRatesByDate(LocalDate date);
+    Optional<CurrencyRate> findCurrencyRateByCurrencyCodeAndDate(String code, LocalDate date);
+    boolean existsByDate(LocalDate date);
 }
