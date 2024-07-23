@@ -1,11 +1,14 @@
 package com.example.vadarodtest.Conrollers;
 
+import com.example.vadarodtest.Exceptions.CurrencyRateNotFoundException;
+import com.example.vadarodtest.Models.CurrencyRate;
 import com.example.vadarodtest.Models.DTOs.RequestCodeDate;
 import com.example.vadarodtest.Models.DTOs.RequestDate;
 import com.example.vadarodtest.Models.DTOs.ResponseValidationError;
 import com.example.vadarodtest.Services.CurrencyRateServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -14,17 +17,25 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/cur-rate")
 @RequiredArgsConstructor
+@Slf4j
 public class CurrencyRateController {
 
     private final CurrencyRateServiceImpl currencyRateService;
 
     @PostMapping("/load")
-    public ResponseEntity<Object> loadCurrencyRates(@Valid @RequestBody RequestDate date,
+    public ResponseEntity<Object> loadCurrencyRates(@Valid @RequestBody RequestDate requestDate,
                                                     BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             ResponseValidationError errorResponse = new ResponseValidationError(bindingResult);
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
+        boolean isDataLoadedForDate=currencyRateService.isCurrencyRatesLoadedForDate(requestDate.getDate());
+        if(!isDataLoadedForDate){
+            currencyRateService.loadCurrencyRatesForDate(requestDate.getDate());
+            log.info("Loading currency rates for date: {}", requestDate.getDate());
+        }
+        String response="Data successfully loaded for date: "+ requestDate.getDate();
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     @GetMapping("/rate")
@@ -34,5 +45,14 @@ public class CurrencyRateController {
             ResponseValidationError errorResponse = new ResponseValidationError(bindingResult);
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
+        try {
+            CurrencyRate currencyRate = currencyRateService.findCurrencyRateByCurrencyCodeAndDate(
+                    codeDate.getCode(), codeDate.getDate());
+            return new  ResponseEntity<>(currencyRate,HttpStatus.OK);
+        }catch (CurrencyRateNotFoundException e){
+            log.error("Currency rate not found for code: {} and date: {}", codeDate.getCode(), codeDate.getDate(), e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
+
     }
 }

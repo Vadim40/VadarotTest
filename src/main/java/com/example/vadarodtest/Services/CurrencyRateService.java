@@ -18,4 +18,6 @@ public interface CurrencyRateService {
     List<CurrencyRate> findCurrencyRatesByDate(LocalDate date);
 
     boolean isCurrencyRatesLoadedForDate(LocalDate date);
+
+    void loadCurrencyRatesForDate(LocalDate date);
 }
