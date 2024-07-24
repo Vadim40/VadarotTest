@@ -1,4 +1,4 @@
-package com.example.vadarodtest;
+package com.example.vadarodtest.Unit;
 
 import com.example.vadarodtest.Models.CurrencyRate;
 import com.example.vadarodtest.Repositories.CurrencyRateRepository;

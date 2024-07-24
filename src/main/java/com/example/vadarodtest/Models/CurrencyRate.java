@@ -23,7 +23,7 @@ public class CurrencyRate {
     private String currencyCode;
     @Column(name = "date")
     private LocalDate date;
-    @Column(name = "rate")
+    @Column(name = "rate", precision = 10, scale = 6)
     private BigDecimal rate;
 
 }
