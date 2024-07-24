@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class CurrencyRateServiceImpl implements CurrencyRateService {
     private final CurrencyRateRepository currencyRateRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final CurrencyRateMapper currencyRateMapper ;
+    private final CurrencyRateMapper currencyRateMapper;
 
     @Value("${nbrb.api.url}")
     private String apiUrl;
@@ -79,9 +79,14 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
                 }
         );
         List<RateDTO> rateDTOs = responseEntity.getBody();
-        if (rateDTOs == null|| rateDTOs.isEmpty()) {
+        if (rateDTOs == null || rateDTOs.isEmpty()) {
             throw new CurrencyRateNotFoundException("No currency rates found for date: " + date);
 
+        }
+
+        RateDTO firstRateDTO = rateDTOs.get(0);
+        if (!date.equals(firstRateDTO.getDate())) {
+            throw new CurrencyRateNotFoundException("No currency rates found for date: " + date);
         }
 
         List<CurrencyRate> currencyRates = rateDTOs.stream()
