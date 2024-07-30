@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,7 +60,7 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
     @Override
     public List<CurrencyRate> findCurrencyRatesByDate(LocalDate date) {
         return currencyRateRepository.findCurrencyRatesByDate(date)
-                .orElseThrow(() -> new CurrencyRateNotFoundException("CurrencyRates not founds for this data"));
+                .orElseThrow(() -> new CurrencyRateNotFoundException("No currency rates found for date: " + date));
     }
 
     @Override
@@ -70,29 +71,36 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
     @Override
     @Transactional
     public void loadCurrencyRatesForDate(LocalDate date) {
+        if (isCurrencyRatesLoadedForDate(date)) {
+            List<RateDTO> rateDTOs = fetchCurrencyRates(date);
+            validateCurrencyRates(rateDTOs, date);
+            saveCurrencyRateDTOs(rateDTOs);
+        }
+    }
+
+    private List<RateDTO> fetchCurrencyRates(LocalDate date) {
         String url = String.format("%s?ondate=%s&periodicity=0", apiUrl, date.toString());
         ResponseEntity<List<RateDTO>> responseEntity = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<>() {
-                }
+                new ParameterizedTypeReference<>() {}
         );
-        List<RateDTO> rateDTOs = responseEntity.getBody();
-        if (rateDTOs == null || rateDTOs.isEmpty()) {
-            throw new CurrencyRateNotFoundException("No currency rates found for date: " + date);
+        return Optional.ofNullable(responseEntity.getBody())
+                .orElseThrow(() -> new CurrencyRateNotFoundException("No currency rates found for date: " + date));
+    }
 
-        }
-
-        RateDTO firstRateDTO = rateDTOs.get(0);
-        if (!date.equals(firstRateDTO.getDate())) {
+    private void validateCurrencyRates(List<RateDTO> rateDTOs, LocalDate date) {
+        if (rateDTOs.isEmpty() || !date.equals(rateDTOs.get(0).getDate())) {
             throw new CurrencyRateNotFoundException("No currency rates found for date: " + date);
         }
+    }
 
+    private void saveCurrencyRateDTOs(List<RateDTO> rateDTOs) {
         List<CurrencyRate> currencyRates = rateDTOs.stream()
                 .map(currencyRateMapper::mapRateDtoToCurrencyRate)
                 .collect(Collectors.toList());
         currencyRateRepository.saveAll(currencyRates);
-
     }
+
 }

@@ -11,6 +11,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RequestDate {
-    @PastOrPresent
+    @PastOrPresent(message = "must contain a past date or today's date")
     private LocalDate date;
 }

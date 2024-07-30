@@ -16,6 +16,6 @@ public class RequestCodeDate {
     @NotNull
     @Length(min = 3, max = 3, message = "Currency code must have only 3 characters")
     private String code;
-    @PastOrPresent
+    @PastOrPresent(message = "must contain a past date or today's date")
     private LocalDate date;
 }
